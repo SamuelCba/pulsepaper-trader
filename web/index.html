@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PulsePaper</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">Monitor de paper trading</div>
+          <h1>PulsePaper</h1>
+        </div>
+        <div class="status-strip">
+          <span id="liveBadge" class="badge neutral">Esperando</span>
+          <span id="refreshText" class="meta">Actualizacion pendiente</span>
+        </div>
+      </header>
+
+      <section class="controls">
+        <label>
+          <span>Mercado</span>
+          <select id="pairSelect">
+            <option>BTC/USDT</option>
+            <option>ETH/USDT</option>
+            <option>SOL/USDT</option>
+            <option>XRP/USDT</option>
+            <option>ADA/USDT</option>
+          </select>
+        </label>
+        <label>
+          <span>Intervalo</span>
+          <select id="intervalSelect">
+            <option value="1">1m</option>
+            <option value="5">5m</option>
+            <option value="15" selected>15m</option>
+            <option value="30">30m</option>
+            <option value="60">1h</option>
+          </select>
+        </label>
+        <label>
+          <span>Estrategia</span>
+          <select id="strategySelect">
+            <option value="trend_breakout" selected>trend_breakout</option>
+            <option value="ema_pullback">ema_pullback</option>
+            <option value="range_reclaim">range_reclaim</option>
+            <option value="momentum_scalp">momentum_scalp</option>
+            <option value="hybrid">hybrid</option>
+          </select>
+        </label>
+        <label>
+          <span>Refresh</span>
+          <select id="refreshSelect">
+            <option value="5">5s</option>
+            <option value="10">10s</option>
+            <option value="15" selected>15s</option>
+            <option value="30">30s</option>
+          </select>
+        </label>
+        <label>
+          <span>Capital inicial</span>
+          <input id="balanceInput" type="number" min="1" step="0.01" value="10">
+        </label>
+        <label>
+          <span>Riesgo por trade</span>
+          <input id="riskInput" type="number" min="0.1" step="0.1" value="10">
+        </label>
+        <button id="refreshNowBtn" class="primary-btn" type="button">Actualizar ahora</button>
+        <button id="resetLiveBtn" class="secondary-btn" type="button">Resetear live</button>
+      </section>
+
+      <main class="dashboard">
+        <section class="hero-panel">
+          <div class="hero-price">
+            <div class="eyebrow" id="marketLabel">Mercado</div>
+            <div class="price-row">
+              <div id="lastPrice" class="price">--</div>
+              <div id="priceDelta" class="delta neutral">--</div>
+            </div>
+            <div id="marketMeta" class="meta-grid"></div>
+          </div>
+          <div class="hero-signal">
+            <div class="eyebrow">Senal actual</div>
+            <div id="signalBadge" class="signal-badge neutral">Sin senal</div>
+            <div id="signalDetails" class="signal-details"></div>
+          </div>
+        </section>
+
+        <section class="chart-panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Accion del precio</div>
+              <div class="panel-subtitle">Velas recientes con volumen y rango visual</div>
+            </div>
+            <div id="chartMeta" class="meta">Muestra reciente</div>
+          </div>
+          <div class="chart-legend">
+            <span><i class="dot up"></i> Vela alcista</span>
+            <span><i class="dot down"></i> Vela bajista</span>
+            <span><i class="dot volume"></i> Volumen</span>
+          </div>
+          <div id="chart" class="chart"></div>
+        </section>
+
+        <section class="stats-grid">
+          <article class="stat-card">
+            <div class="label">Balance</div>
+            <div id="balanceValue" class="value">--</div>
+          </article>
+          <article class="stat-card">
+            <div class="label">PnL</div>
+            <div id="pnlValue" class="value">--</div>
+          </article>
+          <article class="stat-card">
+            <div class="label">Win rate</div>
+            <div id="winRateValue" class="value">--</div>
+          </article>
+          <article class="stat-card">
+            <div class="label">Max drawdown</div>
+            <div id="drawdownValue" class="value">--</div>
+          </article>
+        </section>
+
+        <section class="split-grid">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Referencia historica</div>
+                <div class="panel-subtitle">Solo comparacion; la vista principal usa live desde ahora</div>
+              </div>
+            </div>
+            <div id="historicalPanel" class="position-panel"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Sesion activa desde ahora</div>
+                <div class="panel-subtitle">Esta es la base principal del panel</div>
+              </div>
+            </div>
+            <div id="liveSessionPanel" class="position-panel"></div>
+          </article>
+        </section>
+
+        <section class="split-grid">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Entradas de estrategia</div>
+                <div class="panel-subtitle">Indicadores usados por el modo actual</div>
+              </div>
+            </div>
+            <div id="indicatorsGrid" class="indicator-grid"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Posicion</div>
+                <div class="panel-subtitle">Solo simulada, sin fondos reales</div>
+              </div>
+            </div>
+            <div id="positionPanel" class="position-panel"></div>
+          </article>
+        </section>
+
+        <section class="split-grid">
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Como esta operando</div>
+                <div class="panel-subtitle">Estado exacto del simulador</div>
+              </div>
+            </div>
+            <div id="runtimePanel" class="position-panel"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Como se calcula</div>
+                <div class="panel-subtitle">Resumen corto de la logica activa</div>
+              </div>
+            </div>
+            <div id="explainPanel" class="position-panel"></div>
+          </article>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Comparador rapido</div>
+              <div class="panel-subtitle">Sesion live desde ahora en varios mercados e intervalos</div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mercado</th>
+                  <th>Intervalo</th>
+                  <th>Precio</th>
+                  <th>PnL</th>
+                  <th>Trades</th>
+                  <th>Win rate</th>
+                  <th>DD max</th>
+                  <th>Senal</th>
+                </tr>
+              </thead>
+              <tbody id="scanBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Trades simulados recientes</div>
+              <div class="panel-subtitle">Ultimos trades cerrados del paper trader</div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Entrada</th>
+                  <th>Salida</th>
+                  <th>Precio entrada</th>
+                  <th>Precio salida</th>
+                  <th>PnL</th>
+                  <th>Motivo</th>
+                </tr>
+              </thead>
+              <tbody id="tradesBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Trade seleccionado</div>
+              <div class="panel-subtitle">Toca una fila para ver entrada, salida y recorrido</div>
+            </div>
+          </div>
+          <div id="tradeFocusInfo" class="position-panel"></div>
+          <div id="tradeFocusChart" class="focus-chart"></div>
+        </section>
+      </main>
+    </div>
+    <script src="/app.js"></script>
+  </body>
+  </html>
