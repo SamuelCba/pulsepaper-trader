@@ -14,6 +14,7 @@ Incluye:
 - app web local `PulsePaper`
 - sesiones live persistidas en SQLite
 - comparador live multi-mercado y multi-intervalo
+- despliegue listo para Railway
 
 ## Estructura
 
@@ -65,6 +66,35 @@ Luego abrir:
 ```text
 http://127.0.0.1:8000
 ```
+
+## Despliegue recomendado
+
+### Backend
+
+Usa `Railway`, no `Netlify`, para el backend persistente.
+
+Motivo:
+
+- Railway soporta servicios persistentes de larga duracion
+- este proyecto mantiene sesiones live y snapshots
+- Netlify encaja mejor para funciones y jobs puntuales, no para este monitor persistente
+
+Archivos de despliegue incluidos:
+
+- `app_server.py`
+- `Procfile`
+- `railway.json`
+
+En Railway, el servicio arranca con:
+
+```bash
+python app_server.py
+```
+
+Usa las variables de entorno:
+
+- `HOST` por defecto `0.0.0.0`
+- `PORT` por defecto `8000`
 
 Que hace `watch`:
 
